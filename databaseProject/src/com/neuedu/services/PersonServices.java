@@ -4,9 +4,62 @@
 package com.neuedu.services;
 
 import com.neuedu.services.support.JdbcServicesSupport;
+import com.neuedu.system.db.DBUtils;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class PersonServices extends JdbcServicesSupport {
+
+    /**
+     * 使用map装载查询得到的结果集内容
+     * 使用ResultSetMetaData获取列名
+     * ...
+     * @param id --- 要查询的id
+     * @return --- 返回一个map
+     */
+    public Map<String,String> findById(Object id)throws Exception
+    {
+        PreparedStatement pstm=null;
+        ResultSet rs=null;
+        try
+        {
+            StringBuilder sql=new StringBuilder()
+                    .append("select pid,pname,pnumber,psr,psex,psal,pstate,pmemo")
+                    .append("  from person")
+                    .append(" where pid=?");
+            //编译sql语句
+            pstm=DBUtils.prepareStatement(sql.toString());
+            //填参数
+            pstm.setObject(1,id);
+            //执行查询
+            rs=pstm.executeQuery();
+
+            Map<String,String> map=null;
+            if (rs.next())
+            {
+                //获取rsmd，用于获取列名和列长度
+                ResultSetMetaData rsmd=rs.getMetaData();
+                map=new HashMap<>();
+                //计算列数并循环
+                for (int i=1;i<=rsmd.getColumnCount();i++)
+                {
+                    //列名+值构成map的键值对
+                    map.put(rsmd.getColumnLabel(i),rs.getString(i));
+                }
+            }
+            return map;
+        }
+        finally
+        {
+            DBUtils.close(rs);
+            DBUtils.close(pstm);
+        }
+    }
 
 
     /**
