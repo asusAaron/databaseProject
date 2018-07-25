@@ -9,11 +9,73 @@ import com.neuedu.system.db.DBUtils;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 public class PersonServices extends JdbcServicesSupport {
+
+    public List<Map<String,String>> doQuery(Map<String,Object> queryMap)throws Exception
+    {
+        PreparedStatement pstm=null;
+        ResultSet rs=null;
+        try
+        {
+            StringBuilder sql=new StringBuilder()
+                    .append("select pid,pname,pnumber,pbirthday,psex,psal,pstate,pmemo")
+                    .append("  from person")
+                    .append(" where 1>0");
+
+            for(String key:queryMap.keySet())
+            {
+                Object value=queryMap.get(key);
+                if(key.equals("pname"))
+                {
+                    sql.append(" and ")
+                            .append(key)
+                            .append(" like '%")
+                            .append(value)
+                            .append("%'");
+                }
+                else if(isNotNull(value))
+                {
+                    sql.append(" and ")
+                            .append(key)
+                            .append("=")
+                            .append(value);
+                }
+            }
+
+            //编译sql语句
+            pstm=DBUtils.prepareStatement(sql.toString());
+            //执行查询
+            rs=pstm.executeQuery();
+
+            List<Map<String,String>> mapList=new ArrayList<>();
+            Map<String,String> map=null;
+            while (rs.next())
+            {
+                //获取rsmd，用于获取列名和列长度
+                ResultSetMetaData rsmd=rs.getMetaData();
+                map=new HashMap<>();
+                //计算列数并循环
+                for (int i=1;i<=rsmd.getColumnCount();i++)
+                {
+                    //列名+值构成map的键值对
+                    map.put(rsmd.getColumnLabel(i),rs.getString(i));
+                }
+                mapList.add(map);
+            }
+            return mapList;
+        }
+        finally
+        {
+            DBUtils.close(rs);
+            DBUtils.close(pstm);
+        }
+    }
 
     /**
      * 使用map装载查询得到的结果集内容
@@ -29,7 +91,7 @@ public class PersonServices extends JdbcServicesSupport {
         try
         {
             StringBuilder sql=new StringBuilder()
-                    .append("select pid,pname,pnumber,psr,psex,psal,pstate,pmemo")
+                    .append("select pid,pname,pnumber,pbirthday,psex,psal,pstate,pmemo")
                     .append("  from person")
                     .append(" where pid=?");
             //编译sql语句

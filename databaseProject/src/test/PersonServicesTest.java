@@ -2,6 +2,10 @@ package test;
 
 import com.neuedu.services.PersonServices;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class PersonServicesTest {
     private static PersonServices ps=new PersonServices();
     public static void main(String[] args) {
@@ -10,9 +14,22 @@ public class PersonServicesTest {
 //            updatePerson();
 //            delPerson();
 //            delBatchPerson();
-                updateBatchPerson();
+//                updateBatchPerson();
+            doQuery();
         }catch (Exception e){
             e.printStackTrace();
+        }
+    }
+
+    private static void doQuery()throws Exception
+    {
+        Map<String,Object> queryMap=new HashMap<>();
+        queryMap.put("pname","4");
+        queryMap.put("psex","3");
+        List<Map<String,String>> mapList=ps.doQuery(queryMap);
+        for(Map<String,String> map:mapList)
+        {
+            System.out.println(map);
         }
     }
 

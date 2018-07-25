@@ -323,4 +323,19 @@ public abstract class JdbcServicesSupport {
             DBUtils.close(pstm);
         }
     }
+
+    /**--------------------------------------------------------------------------------------
+     * 辅助工具
+     ----------------------------------------------------------------------------------------*/
+
+    /**
+     * 辅助方法，判断对象不为空
+     * @param o
+     * @return
+     */
+
+    protected final boolean isNotNull(Object o)
+    {
+        return o!=null && !o.equals("");
+    }
 }
